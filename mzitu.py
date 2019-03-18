@@ -101,12 +101,19 @@ def download(page_no, file_path, isLocal,index):
             return;
         count = count + 1
         print("内页第几页：" + str(count))
-        tA = li.find('a')
-        tImg = tA.find('img');
-        tAlt = tImg.get('alt')
-        tSrc = tImg.get('data-original')
-        tTime = li.find('span',class_='time')
-        tFileName = tTime.contents[0]+tAlt
+        
+        # 防止<li>内找不到 <a> 
+        try:
+        	tA = li.find('a')
+	        tImg = tA.find('img');
+	        tAlt = tImg.get('alt')
+	        tSrc = tImg.get('data-original')
+	        tTime = li.find('span',class_='time')
+	        tFileName = tTime.contents[0]+tAlt
+        except Exception as e:
+        	count = count - 1
+        	continue
+            
         # 替换特殊字符
         rightName = re.sub('[\/:*?"<>|]','', tFileName)
         tFullName = file_path + rightName + ".jpg"
