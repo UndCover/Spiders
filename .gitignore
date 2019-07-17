@@ -1,3 +1,12 @@
 .DS_Store
 test
-__pycache__/*
+# mzitu/mzitu/__pycache__/*
+# mzitu/mzitu/spiders/__pycache__/*
+__pycache__
+# mzitu/mzitu/spiders/__pycache__/TestSpider.cpython-36.pyc
+# mzitu/mzitu/__pycache__/__init__.cpython-36.pyc
+# mzitu/mzitu/__pycache__/items.cpython-36.pyc
+# mzitu/mzitu/__pycache__/pipelines.cpython-36.pyc
+# mzitu/mzitu/__pycache__/settings.cpython-36.pyc
+# mzitu/mzitu/spiders/__pycache__/MzituSpider.cpython-36.pyc
+# mzitu/mzitu/spiders/__pycache__/__init__.cpython-36.pyc
