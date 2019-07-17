@@ -101,19 +101,27 @@ def download(page_no, file_path, isLocal,index):
             return;
         count = count + 1
         print("内页第几页：" + str(count))
-        tA = li.find('a')
-        tImg = tA.find('img');
-        tAlt = tImg.get('alt')
-        tSrc = tImg.get('data-original')
-        tTime = li.find('span',class_='time')
-        tFileName = tTime.contents[0]+tAlt
+        
+        # 防止<li>内找不到 <a> 
+        try:
+        	tA = li.find('a')
+	        tImg = tA.find('img');
+	        tAlt = tImg.get('alt')
+	        tSrc = tImg.get('data-original')
+	        tTime = li.find('span',class_='time')
+	        tFileName = tTime.contents[0]+tAlt
+        except Exception as e:
+        	count = count - 1
+        	continue
+            
         # 替换特殊字符
         rightName = re.sub('[\/:*?"<>|]','', tFileName)
         tFullName = file_path + rightName + ".jpg"
 
         newPath = file_path + rightName
         try:
-            headers = {'Referer': mziTu}
+            headers = {'Referer': mziTu,'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
+            # headers = {'Referer': mziTu}
             img = requests.get(tSrc, headers=headers)
             # print('开始保存图片')
             f = open(tFullName, 'ab')
@@ -153,7 +161,8 @@ def download(page_no, file_path, isLocal,index):
                     file_name = array[len(array)-1]
                     # print(file_name)
                     # 防盗链加入Referer
-                    headers = {'Referer': href}
+                    # headers = {'Referer': href}
+                    headers = {'Referer': href,'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
                     img = requests.get(url, headers=headers)
                     # print('开始保存图片')
                     f = open(file_name, 'ab')
