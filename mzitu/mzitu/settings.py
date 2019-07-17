@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 #}
 
 #图片存储位置
-IMAGES_STORE = '/Users/UndCover/Desktop/Spider/mzitu/test'
+IMAGES_STORE = '/Users/UndCover/Desktop/Spider/Spiders/mzitu/test'
 #启动图片下载中间件
 ITEM_PIPELINES = {
    # 'mzitu.pipelines.TestPipeline': 300,

@@ -12,7 +12,7 @@ import requests
 from scrapy.exceptions import DropItem
 
 class MzituPipeline(ImagesPipeline):
-    fPath = '/Users/UndCover/Desktop/Spider/mzitu/test/'
+    fPath = '/Users/UndCover/Desktop/Spider/Spiders/mzitu/test/'
     headers = {'Referer': "https://www.mzitu.com/",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
     def get_media_requests(self, item, info):
         # 循环每一张图片地址下载，若传过来的不是集合则无需循环直接yield
