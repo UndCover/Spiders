@@ -19,8 +19,11 @@ class MzituItem(scrapy.Item):
     # view = scrapy.Field()
 
 # PageInfoModel
-class MzituPageItem(scrapy.Item):
-    pass
+class ImageItem(scrapy.Item):
+    folder = scrapy.Field()
+    src = scrapy.Field()
+    refer = scrapy.Field()
+    
     
 
 class TestItem(scrapy.Item):

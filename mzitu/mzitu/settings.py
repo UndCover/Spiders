@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'mzitu.spiders'
 #USER_AGENT = 'mzitu (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 #}
 
 #图片存储位置
-IMAGES_STORE = '/Users/UndCover/Desktop/Spider/Spiders/mzitu/test'
+IMAGES_STORE = 'D:/scrapy/Spiders/mzitu/mzitu/test/'
 #启动图片下载中间件
 ITEM_PIPELINES = {
    # 'mzitu.pipelines.TestPipeline': 300,

@@ -4,28 +4,53 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
 import os
 import requests
 from scrapy.exceptions import DropItem
+import mzitu.settings as settings
+from mzitu.items import MzituItem,ImageItem
+from pathlib import Path
 
 class MzituPipeline(ImagesPipeline):
-    fPath = '/Users/UndCover/Desktop/Spider/Spiders/mzitu/test/'
     headers = {'Referer': "https://www.mzitu.com/",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
     def get_media_requests(self, item, info):
-        # 循环每一张图片地址下载，若传过来的不是集合则无需循环直接yield
-        thumb_url = item['thumb']
-        yield Request(url=thumb_url,headers=self.headers)
+        if isinstance(item,MzituItem):
+            # yield print('title'+str(self.counter1)+'===========>: '+item['title'])
+            yield Request(url=item['thumb'],headers=self.headers)
+        elif isinstance(item,ImageItem):
+            # yield print('folder'+str(self.counter2)+'===========>: '+item['folder'])
+            yield Request(url=item['src'],headers=self.headers)
+        # if type(item)==MzituItem:
+        #     pass
+        # elif type(item)==ImageItem:
+        #     pass
+
+        # thumb_url = item['thumb']
+        # # yield Request(url=thumb_url,headers=self.headers)
+        # yield print("================================================")
     
     def item_completed(self, results, item, info):
         image_paths = [x['path'] for ok, x in results if ok]
         if not image_paths:
             raise DropItem("Item contains no images")
-        newname = item['time']+item['title']+'.jpg'
-        os.rename(self.fPath+image_paths[0],self.fPath+'full/'+newname)
-        # os.rename("/neteaseauto/" + image_paths[0], "/neteaseauto/" + newname)
+        
+        if isinstance(item,MzituItem):
+            newname = item['time']+item['title']+'.jpg'
+            os.rename(settings.IMAGES_STORE+image_paths[0],settings.IMAGES_STORE+'full/'+newname)
+            pass
+        elif isinstance(item,ImageItem):
+            srcArray = item['src'].split('/')
+            fileName = srcArray[len(srcArray)-1]
+            folderPath = settings.IMAGES_STORE+'full/'+item['folder']
+            folder = Path(folderPath)
+            if folder.exists():
+                pass
+            else:
+                folder.mkdir()
+            os.rename(settings.IMAGES_STORE+image_paths[0],folderPath+'/'+fileName)
+            pass
         return item
 
 class TestPipeline(ImagesPipeline):
