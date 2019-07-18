@@ -20,7 +20,7 @@ class MzituPipeline(ImagesPipeline):
             # yield print('title'+str(self.counter1)+'===========>: '+item['title'])
             yield Request(url=item['thumb'],headers=self.headers)
         elif isinstance(item,ImageItem):
-            # yield print('folder'+str(self.counter2)+'===========>: '+item['folder'])
+            # yield print('~~~~~~~~~~~~~~~~~~~~~'+item['src'])
             yield Request(url=item['src'],headers=self.headers)
         # if type(item)==MzituItem:
         #     pass

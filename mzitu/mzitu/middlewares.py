@@ -7,7 +7,6 @@
 
 from scrapy import signals
 
-
 class MzituSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -36,6 +35,9 @@ class MzituSpiderMiddleware(object):
             yield i
 
     def process_spider_exception(self, response, exception, spider):
+        # print('An Exception MzituSpiderMiddleware ===================================')
+         # 如果发生了Exception列表中的错误，进行重试
+        # return self._retry(request, exception, spider)
         # Called when a spider or process_spider_input() method
         # (from other spider middleware) raises an exception.
 
@@ -90,6 +92,7 @@ class MzituDownloaderMiddleware(object):
         return response
 
     def process_exception(self, request, exception, spider):
+        print('An Exception MzituDownloaderMiddleware ===================================')
         # Called when a download handler or a process_request()
         # (from other downloader middleware) raises an exception.
 

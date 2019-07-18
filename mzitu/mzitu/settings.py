@@ -46,15 +46,15 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'mzitu.middlewares.MzituSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'mzitu.middlewares.MzituSpiderMiddleware': 543,
+}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'mzitu.middlewares.MzituDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   'mzitu.middlewares.MzituDownloaderMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -62,8 +62,12 @@ ROBOTSTXT_OBEY = False
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
+# DOWNLOAD_DELAY = 0.15
+
+LOG_LEVEL = 'INFO' 
+
 #图片存储位置
-IMAGES_STORE = 'D:/scrapy/Spiders/mzitu/mzitu/test/'
+IMAGES_STORE = '/Users/UndCover/Desktop/Spider/Spiders/mzitu/test/'
 #启动图片下载中间件
 ITEM_PIPELINES = {
    # 'mzitu.pipelines.TestPipeline': 300,

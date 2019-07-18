@@ -14,12 +14,14 @@ import scrapy
 import time
 # import logging
 from mzitu.items import MzituItem,ImageItem
+import re
 
 class MzituSpider(scrapy.Spider):
     # logging.basicConfig(level=logging.DEBUG)
     name = 'mzitu'
     allowed_domains = ['mzitu.com']
     start_urls = ['https://www.mzitu.com/']
+    headers = {'Referer': "https://www.mzitu.com/",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
 
     def parse2(self, response):
         print("================================================")
@@ -49,14 +51,17 @@ class MzituSpider(scrapy.Spider):
             _title = _li.xpath("span/a/text()").extract()[0]
             _time = _li.xpath("span/text()").extract()[0]
             
-            item['title'] = _title
+            item['title'] = re.sub(r'[？\\*|“<>:/]', '', _title)
             item['thumb'] = _thumb
             item['time'] = _time
             item['link'] = _link
-            
+
+            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+            print(_link)
             yield item
 
-            yield scrapy.Request(_link,meta={'item':item},callback=self.parseContent)
+            yield scrapy.Request(_link,meta={'item':item},callback=self.parseContent,headers=self.headers)
+            
 
         print("================================================")
     def parseContent(self, response):
@@ -70,8 +75,20 @@ class MzituSpider(scrapy.Spider):
         imageInfo['src'] = _src
         imageInfo['refer'] = _item['link']
         
-        print('UndCover: '+_src)
+        _spans = response.xpath("//*[@class=\"pagenavi\"]/*/span")
+        pageNum = int(_spans[len(_spans)-2].xpath("text()").extract()[0])
+
+        print('**********************************************\n'+_item['link']+'\n'+_src)
         yield imageInfo
+
+        # for i in range(2,pageNum+1):
+        #     nextUrl = _item['link']+'/{page}'.format(page=i)
+
+        #     yield scrapy.Request(nextUrl,meta={'item':_item},callback=self.parseContent,headers=self.headers)
+
+    # def handleError(self, failure):
+    #     self.logger.error(repr(failure))
+
 
     # def parse(self, response):
     #     list = response.css(".list-left dd:not(.page)")
