@@ -62,7 +62,6 @@ class MzituSpider(scrapy.Spider):
 
             yield scrapy.Request(_link,meta={'item':item},callback=self.parseContent,headers=self.headers)
             
-
         print("================================================")
     def parseContent(self, response):
         # _title = response.meta['title']
