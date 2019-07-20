@@ -80,10 +80,10 @@ class MzituSpider(scrapy.Spider):
         print('**********************************************\n'+_item['link']+'\n'+_src)
         yield imageInfo
 
-        # for i in range(2,pageNum+1):
-        #     nextUrl = _item['link']+'/{page}'.format(page=i)
+        for i in range(2,pageNum+1):
+            nextUrl = _item['link']+'/{page}'.format(page=i)
 
-        #     yield scrapy.Request(nextUrl,meta={'item':_item},callback=self.parseContent,headers=self.headers)
+            yield scrapy.Request(nextUrl,meta={'item':_item},callback=self.parseContent,headers=self.headers)
 
     # def handleError(self, failure):
     #     self.logger.error(repr(failure))

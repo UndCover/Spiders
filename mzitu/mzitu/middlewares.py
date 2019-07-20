@@ -6,12 +6,32 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy import settings
+# from scrapy.middleware._retry import RetryMiddleware
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+class MyRetryMiddleware(RetryMiddleware):
+    def process_exception(self, request, exception, spider):
+        print("UndCover =============== retry")
+        if not request.meta.get('dont_retry', False):
+            print("retry: "+request.url)
+            return self._retry(request, exception, spider)
 
 class MzituSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
 
+    # def __init__(self, settings):
+    def __init__(self):
+        # if not settings.getbool('RETRY_ENABLED'):
+        #     raise NotConfigured
+        # self.max_retry_times = settings.getint('RETRY_TIMES')
+        # self.retry_http_codes = set(int(x) for x in settings.getlist('RETRY_HTTP_CODES'))
+        # self.priority_adjust = settings.getint('RETRY_PRIORITY_ADJUST')
+ 
+        
+        self.priority_adjust = 100
+        self.max_retry_times = 8
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
@@ -35,6 +55,29 @@ class MzituSpiderMiddleware(object):
             yield i
 
     def process_spider_exception(self, response, exception, spider):
+        #request = response.request.copy()
+        #original_request_url 为自定义设置的初始请求URL，在用IP代理时部分代理会修改URL
+
+        # request = response.request.replace(url = response.meta.get('original_request_url', response.url))
+        # #retry_times 为自定义重试次数
+        # retry_times = request.meta.get('retry_times', 0)
+        # request.dont_filter = True  #这个一定要有，否则重试的URL会被过滤
+        # request.meta['retry_times'] = retry_times +1
+        
+        # return request
+
+        print("process_spider_exception")
+        request = response.request
+        #retry_times 为自定义重试次数
+        retry_times = request.meta.get('retry_times', 0)
+        request.dont_filter = True  #这个一定要有，否则重试的URL会被过滤
+        request.meta['retry_times'] = retry_times +1
+        
+        if not request.meta.get('dont_retry', False):
+            yield self._retry(request,exception,spider)
+            # return self._retry(request, exception, spider)
+            # self._retry(request, exception, spider)
+
         # print('An Exception MzituSpiderMiddleware ===================================')
          # 如果发生了Exception列表中的错误，进行重试
         # return self._retry(request, exception, spider)
@@ -56,6 +99,40 @@ class MzituSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+    
+    def _retry(self, request, reason, spider):
+        retries = request.meta.get('retry_times', 0) + 1
+ 
+        retry_times = self.max_retry_times
+ 
+        if 'max_retry_times' in request.meta:
+            retry_times = request.meta['max_retry_times']
+ 
+        stats = spider.crawler.stats
+        if retries <= retry_times:
+            print("Retrying %(request)s (failed %(retries)d times): %(reason)s",
+                    request, retries, reason)
+            # logger.debug("Retrying %(request)s (failed %(retries)d times): %(reason)s",
+            #              {'request': request, 'retries': retries, 'reason': reason},
+            #              extra={'spider': spider})
+            retryreq = request.copy()
+            retryreq.meta['retry_times'] = retries
+            retryreq.dont_filter = True
+            retryreq.priority = request.priority + self.priority_adjust
+ 
+            # if isinstance(reason, Exception):
+            #     reason = global_object_name(reason.__class__)
+ 
+            stats.inc_value('retry/count')
+            stats.inc_value('retry/reason_count/%s' % reason)
+            return retryreq
+        else:
+            stats.inc_value('retry/max_reached')
+            print("Gave up retrying %(request)s (failed %(retries)d times): %(reason)s",
+                    request, retries, reason)
+            # logger.debug("Gave up retrying %(request)s (failed %(retries)d times): %(reason)s",
+            #              {'request': request, 'retries': retries, 'reason': reason},
+            #              extra={'spider': spider})
 
 
 class MzituDownloaderMiddleware(object):

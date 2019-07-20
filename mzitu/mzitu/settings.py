@@ -47,13 +47,15 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
+   # 'mzitu.middlewares.MyRetryMiddleware': 100,
    'mzitu.middlewares.MzituSpiderMiddleware': 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'mzitu.middlewares.MzituDownloaderMiddleware': 543,
+   'mzitu.middlewares.MyRetryMiddleware': 100,
+   # 'mzitu.middlewares.MzituDownloaderMiddleware': 543,
 }
 
 # Enable or disable extensions
@@ -65,7 +67,8 @@ DOWNLOADER_MIDDLEWARES = {
 # DOWNLOAD_DELAY = 0.15
 
 LOG_LEVEL = 'INFO' 
-
+RETRY_TIMES = 8
+RETRY_ENABLED = True
 #图片存储位置
 IMAGES_STORE = utils.downloadPath()
 #启动图片下载中间件
