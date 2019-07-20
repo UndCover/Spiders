@@ -31,7 +31,7 @@ class MzituSpiderMiddleware(object):
  
         
         self.priority_adjust = 100
-        self.max_retry_times = 8
+        self.max_retry_times = 255
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.

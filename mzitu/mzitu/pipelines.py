@@ -10,8 +10,117 @@ import os
 import requests
 from scrapy.exceptions import DropItem
 import mzitu.settings as settings
-from mzitu.items import MzituItem,ImageItem
+from mzitu.items import MzituItem,ImageItem,PicContentItem,InformationItem
 from pathlib import Path
+import sqlite3
+import re
+from mzitu import utils
+import time
+
+class TestPipeline(object):
+    def process_item(self, item, spider):
+        # self.count = self.count + 1
+        return item
+
+    def open_spider(self,spider):
+        self.count = 0
+        self.startTime = time.localtime(time.time())
+        print("=======TestPipeline open_spider======")
+
+    def close_spider(self,spider):
+        self.endTime = time.localtime(time.time())
+        print("=======TestPipeline close_spider======")
+        print("count      : "+str(self.count))
+        print("start time : "+time.strftime("%Y-%m-%d %H:%M:%S", self.startTime))
+        print("end   time : "+time.strftime("%Y-%m-%d %H:%M:%S", self.endTime))
+
+class DbPipeline(object):
+    def process_item(self, item, spider):
+        if isinstance(item, InformationItem):
+            if item['sql'] == 0:
+                self.insert_main(item)
+            elif item['sql'] == 1:
+                self.update_main(item)
+        elif isinstance(item, PicContentItem):
+            self.insert_content(item)
+        return item
+    def open_spider(self,spider):
+        self.count = 0
+        self.connector = sqlite3.connect(utils.DB_FILE)
+        self.create_table()
+
+    def close_spider(self,spider):  
+        self.connector.commit()
+        self.connector.close()
+
+    def create_table(self):
+        conn = self.connector
+        try:
+            conn.execute(utils.DB_CREATE_TABLE_MAIN)
+            conn.execute(utils.DB_CREATE_TABLE_CONTENT)
+        except Exception as e:
+            print(e)
+        conn.commit()
+        
+    def insert_main(self,item):
+        # tmp_id = item['link'].split('/')
+        # tb_id = tmp_id[len(tmp_id)-1]
+
+        tb_id = item['pid']
+        tb_title = item['title']
+        tb_fileName = re.sub('[\/:*?"<>|]','', tb_title)
+        tb_link = item['link']
+        tb_postDate = item['time']
+        tb_thumb = item['thumb']
+        tb_picCount = item['number']
+        tb_tags = item['tags']
+        tb_done = 0
+
+        self.count = self.count + 1
+        insert_sql = "INSERT INTO Information (ID,Title,FileName,Link,PostDate,Thumb,PicCount,Tags,Done) VALUES ('%s','%s','%s','%s','%s','%s',%s,'%s',%s)" %(tb_id,tb_title,tb_fileName,tb_link,tb_postDate,tb_thumb,tb_picCount,tb_tags,tb_done)
+        conn = self.connector
+        try:
+            conn.execute(insert_sql)
+        except Exception as e:
+            print(e)
+        if self.count // 10000 > 0:
+            conn.commit()
+            self.count = 0
+
+    def update_main(self,item):
+        tb_id = item['pid']
+        tb_picCount = item['number']
+        tb_done = item['done']
+
+        insert_sql = "update Information set PicCount = %s ,Done = %s where id = '%s'" %(tb_picCount,tb_done,tb_id)
+        conn = self.connector
+        try:
+            conn.execute(insert_sql)
+        except Exception as e:
+            print(e)
+        if self.count // 10000 > 0:
+            conn.commit()
+            self.count = 0
+
+    def insert_content(self,item):
+        # https://i.meizitu.net/2019/02/01e01.jpg
+        t_name = item['link'].split('/')
+        t_id = t_name[len(t_name)-1].split('.')
+        tb_id = item['pid']+'_'+t_id[0]
+        tb_pid = item['pid']
+        tb_link = item['link']
+        tb_done = 0
+        
+        self.count = self.count + 1
+        insert_sql = "INSERT INTO PicContent (ID,Pid,Link,Done) VALUES ('%s','%s','%s','%s')" %(tb_id,tb_pid,tb_link,tb_done)
+        conn = self.connector
+        try:
+            conn.execute(insert_sql)
+        except Exception as e:
+            print(e)
+        if self.count // 10000 > 0:
+            conn.commit()
+            self.count = 0
 
 class MzituPipeline(ImagesPipeline):
     headers = {'Referer': "https://www.mzitu.com/",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
@@ -53,7 +162,7 @@ class MzituPipeline(ImagesPipeline):
             pass
         return item
 
-class TestPipeline(ImagesPipeline):
+class TestImagePipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         # 循环每一张图片地址下载，若传过来的不是集合则无需循环直接yield
         for image_url in item['imgUrl']:

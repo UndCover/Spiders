@@ -39,10 +39,12 @@ ROBOTSTXT_OBEY = False
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+DEFAULT_REQUEST_HEADERS = {
+   # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+   # 'Accept-Language': 'en',
+   'Referer': "https://www.mzitu.com/",
+   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'
+}
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -73,8 +75,9 @@ RETRY_ENABLED = True
 IMAGES_STORE = utils.downloadPath()
 #启动图片下载中间件
 ITEM_PIPELINES = {
-   # 'mzitu.pipelines.TestPipeline': 300,
-   'mzitu.pipelines.MzituPipeline': 300,
+   'mzitu.pipelines.TestPipeline': 100,
+   'mzitu.pipelines.DbPipeline': 100,
+   # 'mzitu.pipelines.MzituPipeline': 300,
 }
 
 # Configure item pipelines
